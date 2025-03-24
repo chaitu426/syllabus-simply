@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
+
 
 const App = () => (
   <TooltipProvider>
@@ -23,7 +23,7 @@ const App = () => (
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="*" element={<NotFound />} />
+        
       </Routes>
     </Router>
   </TooltipProvider>
