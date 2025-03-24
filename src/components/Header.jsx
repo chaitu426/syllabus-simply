@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Settings, LogIn, UserPlus } from 'lucide-react';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -56,12 +56,27 @@ const Header = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <NavLinks />
-          <Link 
-            to="/dashboard" 
-            className="btn-primary"
-          >
-            Get Started
-          </Link>
+          <div className="flex items-center space-x-4">
+            <Link to="/settings" className="text-foreground/90 hover:text-foreground transition-colors">
+              <Settings className="w-5 h-5" />
+            </Link>
+            <Link 
+              to="/login" 
+              className="flex items-center space-x-1 text-foreground/90 hover:text-foreground transition-colors"
+            >
+              <LogIn className="w-5 h-5" />
+              <span>Login</span>
+            </Link>
+            <Link 
+              to="/signup" 
+              className="btn-primary"
+            >
+              <span className="flex items-center">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Sign Up
+              </span>
+            </Link>
+          </div>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -84,11 +99,30 @@ const Header = () => {
           <nav className="flex flex-col space-y-4">
             <NavLinks mobile closeMenu={closeMobileMenu} />
             <Link 
-              to="/dashboard" 
+              to="/settings" 
+              className="flex items-center space-x-2 py-2 px-4 hover:bg-secondary rounded-lg"
+              onClick={closeMobileMenu}
+            >
+              <Settings className="w-5 h-5" />
+              <span>Settings</span>
+            </Link>
+            <Link 
+              to="/login" 
+              className="flex items-center space-x-2 py-2 px-4 hover:bg-secondary rounded-lg"
+              onClick={closeMobileMenu}
+            >
+              <LogIn className="w-5 h-5" />
+              <span>Login</span>
+            </Link>
+            <Link 
+              to="/signup" 
               className="btn-primary text-center"
               onClick={closeMobileMenu}
             >
-              Get Started
+              <span className="flex items-center justify-center">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Sign Up
+              </span>
             </Link>
           </nav>
         </div>
