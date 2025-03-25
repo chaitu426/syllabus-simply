@@ -12,23 +12,49 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate login process
-    setTimeout(() => {
-      // For now, just simulate a successful login
-      // In a real implementation, this would call your backend API
-      console.log('Login attempt with:', { email, password });
-      toast({
-        title: "Logged in successfully",
-        description: "Welcome back to PaperLabs!",
-      });
-      navigate('/dashboard');
-      setIsLoading(false);
-    }, 1500);
-  };
+
+    try {
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Store JWT token in localStorage (optional, based on your auth system)
+            localStorage.setItem("token", data.token); 
+
+            toast({
+                title: "Logged in successfully",
+                description: "Welcome back to PaperLabs!",
+            });
+
+            navigate('/dashboard');
+        } else {
+            toast({
+                title: "Login Failed",
+                description: data.message || "Invalid credentials",
+                status: "error",
+            });
+        }
+    } catch (error) {
+        toast({
+            title: "Error",
+            description: "Failed to connect to the server",
+            status: "error",
+        });
+    } finally {
+        setIsLoading(false);
+    }
+};
+
 
   return (
     <div className="min-h-screen flex flex-col bg-secondary/20">
@@ -57,6 +83,7 @@ const Login = () => {
               <input
                 id="email"
                 type="email"
+                name='email'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -79,6 +106,7 @@ const Login = () => {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  name='password'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"

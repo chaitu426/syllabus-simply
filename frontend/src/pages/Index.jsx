@@ -1,11 +1,59 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef,useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, FileText, Award, Upload, Settings, Download } from 'lucide-react';
-import Header from '../components/Header';
+import Header from '../components/Header'
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const featuresRef = useRef(null);
+  const navigate = useNavigate();
   const howItWorksRef = useRef(null);
+  const [user, setUser] = useState(null);
+  const [greeting, setGreeting] = useState("Welcome");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/profile', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 401) {
+          console.error('Invalid token, logging out...');
+          handleLogout();
+          return;
+        }
+
+        if (!response.ok) throw new Error('Failed to fetch user');
+
+        const data = await response.json();
+        console.log(data);
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data)); // Store user in local storage
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+
+      // Get the current hour
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting("Good Morning");
+    } else if (hour < 18) {
+      setGreeting("Good Afternoon");
+    } else {
+      setGreeting("Good Evening");
+    }
+    };
+
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -25,29 +73,51 @@ const Index = () => {
     return () => elements.forEach((el) => observer.unobserve(el));
   }, []);
 
+  // Handle navigation
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/dashboard"); // Go to dashboard if logged in
+    } else {
+      navigate("/login"); // Redirect to login if not logged in
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <section className="pt-32 pb-20 md:pt-40 md:pb-32 text-center">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="inline-block mb-6 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium animate-fade-in">
-            AI-Powered Question Generator
-          </div>
-          <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
-            Create Perfect Test Papers from Your Syllabus in Seconds
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in">
-            Upload your syllabus and let our AI generate customized questions at any difficulty level.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
-            <Link to="/dashboard" className="btn-primary flex items-center gap-2">
-              Try It Now <ArrowRight className="w-4 h-4" />
-            </Link>
-            <a href="#how-it-works" className="btn-secondary">Learn More</a>
-          </div>
+      <section className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-6 md:px-12 text-center max-w-4xl">
+        <div className="inline-block mb-6 px-5 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium animate-fade-in">
+          AI-Powered Question Generator for Educators
         </div>
-      </section>
+
+        <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight animate-fade-in">
+          {greeting}, {user?.name ? `Professor ${user.name}` : "Respected Educator"} 👋
+        </h1>
+
+        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed animate-fade-in">
+          {user
+            ? "Easily generate well-structured test papers tailored to your syllabus. Save time and enhance learning outcomes."
+            : "Sign in to access a smarter way to create test papers with AI-driven question generation!"}
+        </p>
+
+        <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in">
+        <button
+            onClick={handleGetStarted}
+            className="px-6 py-3 bg-primary text-white text-lg font-medium rounded-lg shadow-md transition hover:bg-primary/90 flex items-center gap-2"
+          >
+            Get Started <ArrowRight className="w-5 h-5" />
+          </button>
+          <a
+            href="#how-it-works"
+            className="px-6 py-3 border border-primary text-primary text-lg font-medium rounded-lg shadow-md transition hover:bg-primary/10"
+          >
+            Learn More
+          </a>
+        </div>
+      </div>
+    </section>
 
       <section id="features" ref={featuresRef} className="py-20 bg-secondary/50 text-center">
         <div className="container mx-auto px-4 md:px-8">

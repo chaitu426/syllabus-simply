@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Settings, ChevronLeft, Download } from 'lucide-react';
+import { Home, Settings, ChevronLeft, Download, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Import components
@@ -99,9 +99,9 @@ const Dashboard = () => {
             <Link to="/" className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-colors" title="Home">
               <Home className="w-5 h-5" />
             </Link>
-            <button className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-colors" title="Settings">
-              <Settings className="w-5 h-5" />
-            </button>
+            <Link to="/Settings" className="text-foreground/90 hover:text-foreground transition-colors">
+                  <User className="w-5 h-5" />
+                </Link>
           </div>
         </div>
       </header>

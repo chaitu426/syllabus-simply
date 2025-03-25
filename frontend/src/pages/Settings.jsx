@@ -1,21 +1,65 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState ,useEffect} from 'react';
+import { Link, useNavigate  } from 'react-router-dom';
 import { ArrowLeft, User, Bell, Lock, LogOut } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const [user, setUser] = useState(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check if user is logged in
+    useEffect(() => {
+      const fetchUser = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+  
+        try {
+          const response = await fetch('http://localhost:5000/api/auth/profile', {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          if (response.status === 401) {
+            console.error('Invalid token, logging out...');
+            handleLogout();
+            return;
+          }
+  
+          if (!response.ok) throw new Error('Failed to fetch user');
+  
+          const data = await response.json();
+          console.log(data);
+          setUser(data);
+          localStorage.setItem('user', JSON.stringify(data)); // Store user in local storage
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
+      };
+  
+      fetchUser();
+    }, []);
 
   const handleLogout = () => {
-    // Simulate logout
+    // Remove token from local storage
+    localStorage.removeItem("token");
+
+    // If using cookies, remove it as well
+    // Cookies.remove("token");
+
     toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account",
+        title: "Logged out successfully",
+        description: "You have been logged out of PaperLabs.",
     });
-    // In a real implementation, you'd clear auth tokens and redirect
-  };
+
+    navigate("/login");
+};
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,9 +133,10 @@ const Settings = () => {
                       Full Name
                     </label>
                     <input
+                      readOnly
                       id="name"
                       type="text"
-                      defaultValue="John Doe"
+                      defaultValue={user?.name}
                       className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
@@ -101,9 +146,10 @@ const Settings = () => {
                       Email Address
                     </label>
                     <input
+                      readOnly
                       id="email"
                       type="email"
-                      defaultValue="john.doe@example.com"
+                      defaultValue={user?.email}
                       className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>

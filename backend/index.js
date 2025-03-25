@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
+import authRouter from './routes/auth.routes.js';
 import User from "./models/User.model.js";
 import Paper from "./models/Paper.model.js";
 import connectDB from './db/connection.js';
@@ -19,6 +20,8 @@ app.get('/', (req, res) => {
     res.send({ message: 'Welcome to the Express Backend!' });
 });
 
+// routes
+app.use('/api/auth', authRouter);
 
 
 // Start the server
