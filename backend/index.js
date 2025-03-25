@@ -1,5 +1,11 @@
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+dotenv.config();
+import User from "./models/User.model.js";
+import Paper from "./models/Paper.model.js";
+import connectDB from './db/connection.js';
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
