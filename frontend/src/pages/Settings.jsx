@@ -1,6 +1,6 @@
 
-import { useState ,useEffect} from 'react';
-import { Link, useNavigate  } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Bell, Lock, LogOut } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 
@@ -12,39 +12,39 @@ const Settings = () => {
   const navigate = useNavigate();
 
   // Check if user is logged in
-    useEffect(() => {
-      const fetchUser = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-  
-        try {
-          const response = await fetch('http://localhost:5000/api/auth/profile', {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-  
-          if (response.status === 401) {
-            console.error('Invalid token, logging out...');
-            handleLogout();
-            return;
-          }
-  
-          if (!response.ok) throw new Error('Failed to fetch user');
-  
-          const data = await response.json();
-          console.log(data);
-          setUser(data);
-          localStorage.setItem('user', JSON.stringify(data)); // Store user in local storage
-        } catch (error) {
-          console.error('Error fetching user:', error);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/profile', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 401) {
+          console.error('Invalid token, logging out...');
+          handleLogout();
+          return;
         }
-      };
-  
-      fetchUser();
-    }, []);
+
+        if (!response.ok) throw new Error('Failed to fetch user');
+
+        const data = await response.json();
+        console.log(data);
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data)); // Store user in local storage
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleLogout = () => {
     // Remove token from local storage
@@ -54,12 +54,14 @@ const Settings = () => {
     // Cookies.remove("token");
 
     toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of PaperLabs.",
+      title: "Logged out successfully",
+      description: "You have been logged out of PaperLabs.",
     });
 
     navigate("/login");
-};
+  };
+
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,34 +86,24 @@ const Settings = () => {
             <nav className="space-y-1">
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === 'profile' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'
-                }`}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'profile' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'
+                  }`}
               >
                 <User className="w-5 h-5" />
                 <span>Profile</span>
               </button>
-              
+
               <button
-                onClick={() => setActiveTab('notifications')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === 'notifications' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'
-                }`}
+                onClick={() => setActiveTab('papers')}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'notifications' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'
+                  }`}
               >
                 <Bell className="w-5 h-5" />
-                <span>Notifications</span>
+                <span>Papers</span>
               </button>
-              
-              <button
-                onClick={() => setActiveTab('security')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === 'security' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'
-                }`}
-              >
-                <Lock className="w-5 h-5" />
-                <span>Security</span>
-              </button>
-              
+
+
+
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-3 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
@@ -121,7 +113,7 @@ const Settings = () => {
               </button>
             </nav>
           </div>
-          
+
           {/* Content */}
           <div className="flex-1 card">
             {activeTab === 'profile' && (
@@ -140,7 +132,7 @@ const Settings = () => {
                       className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label htmlFor="email" className="block text-sm font-medium">
                       Email Address
@@ -153,128 +145,55 @@ const Settings = () => {
                       className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <label htmlFor="bio" className="block text-sm font-medium">
-                      Bio
-                    </label>
-                    <textarea
-                      id="bio"
-                      rows={4}
-                      defaultValue="Teacher at Springfield High School, specializing in Mathematics."
-                      className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    />
-                  </div>
-                  
-                  <button
-                    type="button"
-                    onClick={() => toast({ title: "Profile updated", description: "Your profile information has been updated" })}
-                    className="btn-primary"
-                  >
-                    Save Changes
-                  </button>
+
                 </form>
               </div>
             )}
-            
-            {activeTab === 'notifications' && (
+            {/* this is static make it dynamic any one first make paper routes vedant or rupesh */}
+            {activeTab === 'papers' && (
               <div>
-                <h2 className="text-xl font-bold mb-6">Notification Preferences</h2>
+                <h2 className="text-xl font-bold mb-6">Your Papers & Downloads</h2>
+
+                {/* Demo Papers List */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">Email Notifications</h3>
-                      <p className="text-sm text-muted-foreground">Receive notifications about your account via email</p>
+                  {[
+                    { id: 1, title: "Math Test - Algebra", date: "March 24, 2025" },
+                    { id: 2, title: "Physics Quiz - Mechanics", date: "March 22, 2025" },
+                    { id: 3, title: "History Exam - Ancient Civilizations", date: "March 20, 2025" }
+                  ].map((paper, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg bg-background">
+                      <div>
+                        <h3 className="font-medium">{paper.title}</h3>
+                        <p className="text-sm text-muted-foreground">{paper.date}</p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <select className="border border-border p-2 rounded-lg">
+                          <option value="pdf">PDF</option>
+                          <option value="docx">DOCX</option>
+                          <option value="txt">TXT</option>
+                        </select>
+
+                        <button className="btn-primary px-3 py-1.5" onClick={() => alert(`Downloading ${paper.title}`)}>
+                          Download
+                        </button>
+
+                        <button className="btn-danger px-3 py-1.5" onClick={() => alert(`Deleting ${paper.title}`)}>
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="relative w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">Browser Notifications</h3>
-                      <p className="text-sm text-muted-foreground">Receive notifications in your browser</p>
-                    </div>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" />
-                      <div className="relative w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">Marketing Emails</h3>
-                      <p className="text-sm text-muted-foreground">Receive emails about new features and updates</p>
-                    </div>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="relative w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                  
-                  <button
-                    type="button"
-                    onClick={() => toast({ title: "Preferences saved", description: "Your notification preferences have been updated" })}
-                    className="btn-primary mt-6"
-                  >
-                    Save Preferences
-                  </button>
+                  ))}
                 </div>
+
+                {/* Download All Papers */}
+                <button className="btn-primary mt-6" onClick={() => alert("Downloading all papers")}>
+                  Download All Papers
+                </button>
               </div>
             )}
-            
-            {activeTab === 'security' && (
-              <div>
-                <h2 className="text-xl font-bold mb-6">Security Settings</h2>
-                <form className="space-y-6">
-                  <div className="space-y-2">
-                    <label htmlFor="current-password" className="block text-sm font-medium">
-                      Current Password
-                    </label>
-                    <input
-                      id="current-password"
-                      type="password"
-                      className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label htmlFor="new-password" className="block text-sm font-medium">
-                      New Password
-                    </label>
-                    <input
-                      id="new-password"
-                      type="password"
-                      className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label htmlFor="confirm-password" className="block text-sm font-medium">
-                      Confirm New Password
-                    </label>
-                    <input
-                      id="confirm-password"
-                      type="password"
-                      className="w-full p-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  
-                  <button
-                    type="button"
-                    onClick={() => toast({ title: "Password updated", description: "Your password has been changed successfully" })}
-                    className="btn-primary"
-                  >
-                    Update Password
-                  </button>
-                </form>
-              </div>
-            )}
+
+
           </div>
         </div>
       </div>

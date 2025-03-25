@@ -68,4 +68,26 @@ authRouter.get('/profile', authMiddleware, async (req, res) => {
   });
 
 
+  // Update user bio not used you can implement its frontend in settings page
+  authRouter.put("/update", authMiddleware, async (req, res) => {
+    try {
+        const { bio } = req.body;
+
+        // Find user by ID
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Update user bio
+        user.bio = bio;
+        await user.save();
+
+        res.status(200).json({ message: "Bio updated successfully", bio: user.bio });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+
 export default authRouter;
