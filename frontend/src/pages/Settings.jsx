@@ -10,6 +10,10 @@ const Settings = () => {
   const [user, setUser] = useState(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [papers, setPapers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPaper, setSelectedPaper] = useState(null);
+  const [showAnswers, setShowAnswers] = useState(false);
 
   // Check if user is logged in
   useEffect(() => {
@@ -45,6 +49,41 @@ const Settings = () => {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const fetchPapers = async () => {
+      if (!user?._id) return; // Ensure user is available
+  
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/papers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ createdBy: user._id }), // Now user is guaranteed to exist
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to fetch papers");
+        }
+  
+        const data = await response.json();
+        setPapers(data);
+        console.log(data);
+        console.log(papers);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    if (user) {
+      fetchPapers();
+    }
+  }, [user]); // Only run when `user` is set
+  
 
   const handleLogout = () => {
     // Remove token from local storage
@@ -156,35 +195,92 @@ const Settings = () => {
 
                 {/* Demo Papers List */}
                 <div className="space-y-4">
-                  {[
-                    { id: 1, title: "Math Test - Algebra", date: "March 24, 2025" },
-                    { id: 2, title: "Physics Quiz - Mechanics", date: "March 22, 2025" },
-                    { id: 3, title: "History Exam - Ancient Civilizations", date: "March 20, 2025" }
-                  ].map((paper, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg bg-background">
-                      <div>
-                        <h3 className="font-medium">{paper.title}</h3>
-                        <p className="text-sm text-muted-foreground">{paper.date}</p>
-                      </div>
+      {!selectedPaper ? (
+        // Show list of papers
+        papers.map((paper, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-4 border border-border rounded-lg bg-background cursor-pointer"
+            onClick={() => setSelectedPaper(paper)}
+          >
+            <div>
+              <h3 className="font-medium">{paper.title}</h3>
+              <p className="text-sm text-muted-foreground">{paper.date}</p>
+            </div>
 
-                      <div className="flex items-center gap-3">
-                        <select className="border border-border p-2 rounded-lg">
-                          <option value="pdf">PDF</option>
-                          <option value="docx">DOCX</option>
-                          <option value="txt">TXT</option>
-                        </select>
+            <div className="flex items-center gap-3">
+              <select className="border border-border p-2 rounded-lg">
+                <option value="pdf">PDF</option>
+                <option value="docx">DOCX</option>
+                <option value="txt">TXT</option>
+              </select>
 
-                        <button className="btn-primary px-3 py-1.5" onClick={() => alert(`Downloading ${paper.title}`)}>
-                          Download
-                        </button>
+              <button
+                className="btn-primary px-3 py-1.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  alert(`Downloading ${paper.title}`);
+                }}
+              >
+                Download
+              </button>
 
-                        <button className="btn-danger px-3 py-1.5" onClick={() => alert(`Deleting ${paper.title}`)}>
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <button
+                className="btn-danger px-3 py-1.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  alert(`Deleting ${paper.title}`);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))
+      ) : (
+        // Show selected paper in question format
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <button className="btn-secondary" onClick={() => setSelectedPaper(null)}>
+              Back to Papers
+            </button>
+            <button className="btn-primary" onClick={() => setShowAnswers(!showAnswers)}>
+              {showAnswers ? "Show Question Paper" : "Show Answer Key"}
+            </button>
+          </div>
+
+          <h2 className="text-lg font-semibold">{selectedPaper.title}</h2>
+
+          {/* Toggle View: Question Paper OR Answer Key */}
+          {!showAnswers ? (
+            // Question Paper Format
+            <div className="p-4 border border-border rounded-lg bg-background">
+              <h3 className="font-medium mb-3 text-center">Question Paper</h3>
+              <ul className="space-y-4">
+                {selectedPaper.generateQuestionPaper.map((q, i) => (
+                  <li key={i} className="text-sm">
+                    <span className="font-semibold">{i + 1}. [{q.type}]</span> {q.question}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            // Answer Key Format
+            <div className="p-4 border border-border rounded-lg bg-background">
+              <h3 className="font-medium mb-3 text-center">Answer Key</h3>
+              <ul className="space-y-4">
+                {selectedPaper.generateQuestionPaper.map((q, i) => (
+                  <li key={i} className="text-sm">
+                    <span className="font-semibold">{i + 1}. [{q.type}]</span> {q.question}  
+                    <span className="text-green-500 font-semibold"> → {q.answer}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
 
                 {/* Download All Papers */}
                 <button className="btn-primary mt-6" onClick={() => alert("Downloading all papers")}>

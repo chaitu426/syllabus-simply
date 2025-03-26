@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
 import authRouter from './routes/auth.routes.js';
+import aiRouter from './routes/ai.route.js';
+import pdfRouter from './routes/pdf.route.js';
 import User from "./models/User.model.js";
 import Paper from "./models/Paper.model.js";
 import connectDB from './db/connection.js';
@@ -22,6 +24,9 @@ app.get('/', (req, res) => {
 
 // routes
 app.use('/api/auth', authRouter);
+app.use('/api/ai', aiRouter);
+app.use('/api/pdf', pdfRouter);
+
 
 
 // Start the server

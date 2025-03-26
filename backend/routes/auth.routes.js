@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.model.js';
 import authMiddleware from '../middlewares/auth.js';
+import QuestionPaper from "../models/Paper.model.js"
 
 const authRouter = express.Router();
 
@@ -89,5 +90,17 @@ authRouter.get('/profile', authMiddleware, async (req, res) => {
     }
 });
 
+
+authRouter.post("/papers", async (req, res) => {
+    try {
+        const {createdBy}=req.body
+        const papers = await QuestionPaper.find({createdBy});
+
+        res.status(200).json(papers);
+        console.log(papers);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
 
 export default authRouter;

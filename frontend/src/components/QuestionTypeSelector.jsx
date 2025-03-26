@@ -20,18 +20,8 @@ const questionTypes = [
     description: 'Extended responses requiring detailed explanations.',
     icon: '📝'
   },
-  {
-    id: 'truefalse',
-    title: 'True/False',
-    description: 'Simple statements that must be marked as true or false.',
-    icon: '✓'
-  },
-  {
-    id: 'matching',
-    title: 'Matching',
-    description: 'Questions that require matching items from two columns.',
-    icon: '🔄'
-  },
+  
+  
   {
     id: 'fillblanks',
     title: 'Fill in the Blanks',

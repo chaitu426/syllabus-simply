@@ -37,45 +37,37 @@ const UploadSection = ({ onSyllabusUploaded }) => {
   };
 
   const handleSubmit = async () => {
-    // Validate input based on the upload method
-    if (uploadMethod === 'text' && !syllabusText.trim()) {
-      toast.error('Please enter syllabus content.');
-      return;
-    }
-    
-    if ((uploadMethod === 'file' || uploadMethod === 'image') && !uploadedFile) {
-      toast.error(`Please upload a ${uploadMethod === 'file' ? 'document' : 'image'} first.`);
-      return;
+    if (uploadMethod === "text" && !syllabusText.trim()) {
+        toast.error("Please enter syllabus content.");
+        return;
     }
 
-    // Process the upload
-    try {
-      setIsUploading(true);
-      
-      // Here we would normally send the data to the backend
-      // For now, let's simulate a successful upload with a delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Construct the response data
-      const syllabusData = {
-        type: uploadMethod,
-        content: uploadMethod === 'text' ? syllabusText : uploadedFile.name,
-        timestamp: new Date().toISOString(),
-      };
-      
-      // Notify user of success
-      toast.success('Syllabus uploaded successfully!');
-      
-      // Pass the data to the parent component
-      onSyllabusUploaded(syllabusData);
-      
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload syllabus. Please try again.');
-    } finally {
-      setIsUploading(false);
+    if ((uploadMethod === "file" || uploadMethod === "image") && !uploadedFile) {
+        toast.error(`Please upload a ${uploadMethod === "file" ? "document" : "image"} first.`);
+        return;
     }
-  };
+
+    try {
+        setIsUploading(true);
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        // Save syllabus data
+        const syllabusData = {
+            type: uploadMethod,
+            content: uploadMethod === "text" ? syllabusText : uploadedFile, // Save file if uploaded
+            timestamp: new Date().toISOString(),
+        };
+
+        toast.success("Syllabus uploaded successfully!");
+        onSyllabusUploaded(syllabusData);
+    } catch (error) {
+        console.error("Upload error:", error);
+        toast.error("Failed to upload syllabus. Please try again.");
+    } finally {
+        setIsUploading(false);
+    }
+};
+
 
   const clearUpload = () => {
     if (uploadMethod === 'text') {
@@ -147,7 +139,7 @@ const UploadSection = ({ onSyllabusUploaded }) => {
           <Upload className="mr-2 w-4 h-4" />
           Document Upload
         </button>
-        <button 
+        {/* <button 
           className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             uploadMethod === 'image' 
               ? 'bg-primary text-primary-foreground' 
@@ -157,7 +149,7 @@ const UploadSection = ({ onSyllabusUploaded }) => {
         >
           <Image className="mr-2 w-4 h-4" />
           Image Upload
-        </button>
+        </button> */}
       </div>
 
       {/* Text Input */}
