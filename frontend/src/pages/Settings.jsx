@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Bell, Lock, LogOut } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import jsPDF from 'jspdf';
+import autoTable from "jspdf-autotable";
+import { saveAs } from "file-saver";
 
 
 const Settings = () => {
@@ -53,7 +56,7 @@ const Settings = () => {
   useEffect(() => {
     const fetchPapers = async () => {
       if (!user?._id) return; // Ensure user is available
-  
+
       try {
         const response = await fetch("http://localhost:5000/api/auth/papers", {
           method: "POST",
@@ -63,11 +66,11 @@ const Settings = () => {
           },
           body: JSON.stringify({ createdBy: user._id }), // Now user is guaranteed to exist
         });
-  
+
         if (!response.ok) {
           throw new Error("Failed to fetch papers");
         }
-  
+
         const data = await response.json();
         setPapers(data);
         console.log(data);
@@ -78,13 +81,98 @@ const Settings = () => {
         setLoading(false);
       }
     };
-  
+
     if (user) {
       fetchPapers();
     }
   }, [user]); // Only run when `user` is set
-  
 
+  const downloadPaper = (format) => {
+    if (!selectedPaper) return;
+
+    if (format === "pdf") {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text(selectedPaper.title, 105, 15, { align: "center" });
+      doc.setFontSize(12);
+      doc.text("Question Paper", 105, 25, { align: "center" });
+
+      const questionTable = selectedPaper.generateQuestionPaper.map((q, i) => [
+        `${i + 1}. [${q.type}]`,
+        q.question,
+      ]);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [["No.", "Question"]],
+        body: questionTable,
+        styles: { fontSize: 10, cellPadding: 5 },
+        columnStyles: {
+          0: { cellWidth: 20, fontStyle: "bold" },
+          1: { cellWidth: 170 },
+        },
+      });
+
+      if (showAnswers) {
+        doc.addPage();
+        doc.text("Answer Key", 105, 15, { align: "center" });
+
+        const answerTable = selectedPaper.generateQuestionPaper.map((q, i) => [
+          `${i + 1}. [${q.type}]`,
+          q.question,
+          q.answer,
+        ]);
+
+        autoTable(doc, {
+          startY: 30,
+          head: [["No.", "Question", "Answer"]],
+          body: answerTable,
+          styles: { fontSize: 10, cellPadding: 5 },
+          columnStyles: {
+            0: { cellWidth: 20, fontStyle: "bold" },
+            1: { cellWidth: 120 },
+            2: { cellWidth: 50, textColor: "green" },
+          },
+        });
+      }
+
+      doc.save(`${selectedPaper.title}.pdf`);
+    } else if (format === "docx") {
+      let content = `${selectedPaper.title}\n\nQUESTION PAPER\n\n`;
+      selectedPaper.generateQuestionPaper.forEach((q, i) => {
+        content += `${i + 1}. [${q.type}] ${q.question}\n\n`;
+      });
+
+      if (showAnswers) {
+        content += `\n\nANSWER KEY\n\n`;
+        selectedPaper.generateQuestionPaper.forEach((q, i) => {
+          content += `${i + 1}. [${q.type}] ${q.question}\nAnswer: ${q.answer}\n\n`;
+        });
+      }
+
+      const blob = new Blob([content], { type: "application/msword" });
+      saveAs(blob, `${selectedPaper.title}.docx`);
+    } else if (format === "csv") {
+      const csvContent = "data:text/csv;charset=utf-8," +
+        selectedPaper.generateQuestionPaper.map(q => `${q.type},"${q.question}","${showAnswers ? q.answer : ''}"`).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${selectedPaper.title}.csv`);
+      document.body.appendChild(link);
+      link.click();
+    }
+  };
+
+  const handleExport = () => {
+    if (questions.length === 0) {
+      toast.error('No questions to export');
+      return;
+    }
+
+    setShowExportOptions(true);
+  };
+  
   const handleLogout = () => {
     // Remove token from local storage
     localStorage.removeItem("token");
@@ -194,98 +282,73 @@ const Settings = () => {
                 <h2 className="text-xl font-bold mb-6">Your Papers & Downloads</h2>
 
                 {/* Demo Papers List */}
-                <div className="space-y-4">
-      {!selectedPaper ? (
-        // Show list of papers
-        papers.map((paper, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-4 border border-border rounded-lg bg-background cursor-pointer"
-            onClick={() => setSelectedPaper(paper)}
-          >
-            <div>
-              <h3 className="font-medium">{paper.title}</h3>
-              <p className="text-sm text-muted-foreground">{paper.date}</p>
-            </div>
+                <div className="space-y-4 p-6">
+                  {!selectedPaper ? (
+                    <div className="space-y-4">
+                      {papers.map((paper, index) => (
+                        <div
+                          key={index}
+                          className="p-4 border border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:shadow-lg"
+                          onClick={() => setSelectedPaper(paper)}
+                        >
+                          <div>
+                            <h3 className="font-semibold text-lg">{paper.title}</h3>
+                            <p className="text-sm text-gray-500">{paper.date}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-6 bg-white p-6 rounded-lg border border-gray-300 shadow-lg">
+                      <div className="flex justify-between items-center">
+                        <button
+                          className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
+                          onClick={() => setSelectedPaper(null)}
+                        >
+                          Back to Papers
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          onClick={() => setShowAnswers(!showAnswers)}
+                        >
+                          {showAnswers ? "Show Question Paper" : "Show Answer Key"}
+                        </button>
+                      </div>
 
-            <div className="flex items-center gap-3">
-              <select className="border border-border p-2 rounded-lg">
-                <option value="pdf">PDF</option>
-                <option value="docx">DOCX</option>
-                <option value="txt">TXT</option>
-              </select>
+                      <h2 className="text-2xl font-bold text-center">{selectedPaper.title}</h2>
 
-              <button
-                className="btn-primary px-3 py-1.5"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  alert(`Downloading ${paper.title}`);
-                }}
-              >
-                Download
-              </button>
-
-              <button
-                className="btn-danger px-3 py-1.5"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  alert(`Deleting ${paper.title}`);
-                }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))
-      ) : (
-        // Show selected paper in question format
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <button className="btn-secondary" onClick={() => setSelectedPaper(null)}>
-              Back to Papers
-            </button>
-            <button className="btn-primary" onClick={() => setShowAnswers(!showAnswers)}>
-              {showAnswers ? "Show Question Paper" : "Show Answer Key"}
-            </button>
-          </div>
-
-          <h2 className="text-lg font-semibold">{selectedPaper.title}</h2>
-
-          {/* Toggle View: Question Paper OR Answer Key */}
-          {!showAnswers ? (
-            // Question Paper Format
-            <div className="p-4 border border-border rounded-lg bg-background">
-              <h3 className="font-medium mb-3 text-center">Question Paper</h3>
-              <ul className="space-y-4">
-                {selectedPaper.generateQuestionPaper.map((q, i) => (
-                  <li key={i} className="text-sm">
-                    <span className="font-semibold">{i + 1}. [{q.type}]</span> {q.question}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            // Answer Key Format
-            <div className="p-4 border border-border rounded-lg bg-background">
-              <h3 className="font-medium mb-3 text-center">Answer Key</h3>
-              <ul className="space-y-4">
-                {selectedPaper.generateQuestionPaper.map((q, i) => (
-                  <li key={i} className="text-sm">
-                    <span className="font-semibold">{i + 1}. [{q.type}]</span> {q.question}  
-                    <span className="text-green-500 font-semibold"> → {q.answer}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+                      {!showAnswers ? (
+                        <div className="border border-gray-400 p-6 rounded-lg bg-gray-50 space-y-6">
+                          <h3 className="text-xl font-semibold text-center underline">Question Paper</h3>
+                          {selectedPaper.generateQuestionPaper.map((q, i) => (
+                            <div key={i} className="p-4 border border-gray-300 rounded-lg bg-white shadow-sm">
+                              <p className="font-semibold text-lg">{i + 1}. [{q.type}]</p>
+                              <p className="text-md">{q.question}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="border border-gray-400 p-6 rounded-lg bg-gray-50 space-y-6">
+                          <h3 className="text-xl font-semibold text-center underline">Answer Key</h3>
+                          {selectedPaper.generateQuestionPaper.map((q, i) => (
+                            <div key={i} className="p-4 border border-gray-300 rounded-lg bg-white shadow-sm">
+                              <p className="font-semibold text-lg">{i + 1}. [{q.type}]</p>
+                              <p className="text-md">{q.question}</p>
+                              <p className="text-green-600 font-semibold mt-2">Answer: {q.answer}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* Download All Papers */}
-                <button className="btn-primary mt-6" onClick={() => alert("Downloading all papers")}>
-                  Download All Papers
-                </button>
+                <div className="flex justify-end space-x-2">
+            <button className="px-3 py-1.5 bg-green-500 text-white rounded-lg" onClick={() => downloadPaper("pdf")}>Download PDF</button>
+            
+            <button className="px-3 py-1.5 bg-yellow-500 text-white rounded-lg" onClick={() => downloadPaper("csv")}>Download CSV</button>
+          </div>
               </div>
             )}
 

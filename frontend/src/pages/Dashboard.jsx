@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Home, Settings, ChevronLeft, Download, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 // Import components
 import UploadSection from '../components/UploadSection';
@@ -14,6 +15,7 @@ import ExportOptions from '../components/ExportOptions';
 const Dashboard = () => {
 
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -149,7 +151,7 @@ const Dashboard = () => {
       return;
     }
 
-    setShowExportOptions(true);
+    navigate('/settings');
   };
 
   // Close export modal

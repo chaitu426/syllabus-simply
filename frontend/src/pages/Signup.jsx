@@ -33,7 +33,7 @@ const Signup = () => {
                 title: "Account created successfully",
                 description: "Welcome to PaperLabs!",
             });
-            navigate('/dashboard');
+            navigate('/login');
         } else {
             toast({
                 title: "Signup Failed",
