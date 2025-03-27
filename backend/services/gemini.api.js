@@ -30,8 +30,8 @@ export const generateQuestionPaper = async (syllabus, difficulty, questionType) 
  7. Ensure **type values strictly match**: "mcq", "fillblanks", "truefalse", "matching", "longAnswer", "shortAnswer".  
  8. **For question types other than mcq and matching, DO NOT return the "options" field.**  
  9. dont give true false questions for short answer and long answer questions.
-10. give ans of longAnswer in detail 6-7 lines.
-11. give ans of shortAnswer in 2-3 lines.
+10. give ans of longAnswer in detail 6-7 lines from documents and your own.
+11. give ans of shortAnswer in 2-3 lines from documents and your own.
 ### **Output Format (Strict JSON):**  
 [
   { "question": "What is recursion?", "type": "mcq", "options": ["Function calls itself", "Loop", "Variable", "None"], "answer": "Function calls itself" },
