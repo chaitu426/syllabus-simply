@@ -14,11 +14,11 @@ export const generateQuestionPaper = async (syllabus, difficulty, questionType) 
       console.log(difficulty);
   
       const prompt = `
-        You are an AI-powered question paper generator. Generate **5 questions per type** strictly based on the given syllabus.
+        You are an AI-powered question paper generator. Generate **10 questions per type** strictly based on the given syllabus.
 
 - **Syllabus:** ${syllabus}  
 - **Difficulty Level:** ${difficulty}% out of 100%   
-- **Question Types:** ${questionType} (comma-separated)  
+- **Question Types:** ${questionType} (comma-separated) only give the question types mentioned in **Question Types:**.  
 
 ### **Instructions:**  
  1. Extract all question types from the input (e.g., mcq, truefalse, shortAnswer, fillblanks).  
@@ -29,9 +29,8 @@ export const generateQuestionPaper = async (syllabus, difficulty, questionType) 
  6. Ensure **options[] exists only for "mcq" and "matching" question types**.  
  7. Ensure **type values strictly match**: "mcq", "fillblanks", "truefalse", "matching", "longAnswer", "shortAnswer".  
  8. **For question types other than mcq and matching, DO NOT return the "options" field.**  
- 9. dont give true false questions for short answer and long answer questions.
-10. give ans of longAnswer in detail 6-7 lines from documents and your own.
-11. give ans of shortAnswer in 2-3 lines from documents and your own.
+ 9. dont give true false questions .
+
 ### **Output Format (Strict JSON):**  
 [
   { "question": "What is recursion?", "type": "mcq", "options": ["Function calls itself", "Loop", "Variable", "None"], "answer": "Function calls itself" },
