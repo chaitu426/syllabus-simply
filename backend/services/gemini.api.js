@@ -11,12 +11,13 @@ export const generateQuestionPaper = async (syllabus, difficulty, questionType) 
       if (!GEMINI_API_KEY) {
         throw new Error("GEMINI_API_KEY is missing in .env file");
       }
+      console.log(difficulty);
   
       const prompt = `
         You are an AI-powered question paper generator. Generate **5 questions per type** strictly based on the given syllabus.
 
 - **Syllabus:** ${syllabus}  
-- **Difficulty Level:** ${difficulty}  
+- **Difficulty Level:** ${difficulty}% out of 100%   
 - **Question Types:** ${questionType} (comma-separated)  
 
 ### **Instructions:**  

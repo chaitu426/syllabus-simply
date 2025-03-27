@@ -17,7 +17,7 @@ const Index = () => {
       if (!token) return;
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/profile', {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/profile`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,

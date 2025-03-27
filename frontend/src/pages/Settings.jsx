@@ -25,7 +25,7 @@ const Settings = () => {
       if (!token) return;
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/profile', {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/profile`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -58,7 +58,7 @@ const Settings = () => {
       if (!user?._id) return; // Ensure user is available
 
       try {
-        const response = await fetch("http://localhost:5000/api/auth/papers", {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/papers`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -172,7 +172,7 @@ const Settings = () => {
 
     setShowExportOptions(true);
   };
-  
+
   const handleLogout = () => {
     // Remove token from local storage
     localStorage.removeItem("token");
@@ -282,73 +282,78 @@ const Settings = () => {
                 <h2 className="text-xl font-bold mb-6">Your Papers & Downloads</h2>
 
                 {/* Demo Papers List */}
-                <div className="space-y-4 p-6">
-                  {!selectedPaper ? (
-                    <div className="space-y-4">
-                      {papers.map((paper, index) => (
-                        <div
-                          key={index}
-                          className="p-4 border border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:shadow-lg"
-                          onClick={() => setSelectedPaper(paper)}
-                        >
-                          <div>
-                            <h3 className="font-semibold text-lg">{paper.title}</h3>
-                            <p className="text-sm text-gray-500">{paper.date}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-6 bg-white p-6 rounded-lg border border-gray-300 shadow-lg">
-                      <div className="flex justify-between items-center">
-                        <button
-                          className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
-                          onClick={() => setSelectedPaper(null)}
-                        >
-                          Back to Papers
-                        </button>
-                        <button
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                          onClick={() => setShowAnswers(!showAnswers)}
-                        >
-                          {showAnswers ? "Show Question Paper" : "Show Answer Key"}
-                        </button>
-                      </div>
+                <div className="p-4 sm:p-6">
+  {!selectedPaper ? (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {papers.map((paper, index) => (
+        <div
+          key={index}
+          className="p-5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 shadow-md hover:shadow-lg transition duration-300 cursor-pointer"
+          onClick={() => setSelectedPaper(paper)}
+        >
+          <h3 className="font-semibold text-lg text-gray-800 dark:text-white">{paper.title}</h3>
+          <p className="text-sm text-gray-500">{paper.date}</p>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
+      {/* Navigation Buttons */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+        <button
+          className="px-4 py-2 w-full sm:w-auto bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+          onClick={() => setSelectedPaper(null)}
+        >
+          ← Back to Papers
+        </button>
+        <button
+          className="px-4 py-2 w-full sm:w-auto bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          onClick={() => setShowAnswers(!showAnswers)}
+        >
+          {showAnswers ? "Show Question Paper" : "Show Answer Key"}
+        </button>
+      </div>
 
-                      <h2 className="text-2xl font-bold text-center">{selectedPaper.title}</h2>
+      {/* Title */}
+      <h2 className="text-2xl font-bold text-center mt-4 text-gray-900 dark:text-white">
+        {selectedPaper.title}
+      </h2>
 
-                      {!showAnswers ? (
-                        <div className="border border-gray-400 p-6 rounded-lg bg-gray-50 space-y-6">
-                          <h3 className="text-xl font-semibold text-center underline">Question Paper</h3>
-                          {selectedPaper.generateQuestionPaper.map((q, i) => (
-                            <div key={i} className="p-4 border border-gray-300 rounded-lg bg-white shadow-sm">
-                              <p className="font-semibold text-lg">{i + 1}. [{q.type}]</p>
-                              <p className="text-md">{q.question}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="border border-gray-400 p-6 rounded-lg bg-gray-50 space-y-6">
-                          <h3 className="text-xl font-semibold text-center underline">Answer Key</h3>
-                          {selectedPaper.generateQuestionPaper.map((q, i) => (
-                            <div key={i} className="p-4 border border-gray-300 rounded-lg bg-white shadow-sm">
-                              <p className="font-semibold text-lg">{i + 1}. [{q.type}]</p>
-                              <p className="text-md">{q.question}</p>
-                              <p className="text-green-600 font-semibold mt-2">Answer: {q.answer}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+      {/* Question Paper / Answer Key */}
+      <div className="mt-6 p-4 sm:p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md">
+        <h3 className="text-lg sm:text-xl font-semibold text-center text-gray-800 dark:text-white">
+          {showAnswers ? "Answer Key" : "Question Paper"}
+        </h3>
+
+        <div className="mt-4 space-y-4">
+          {selectedPaper.generateQuestionPaper.map((q, i) => (
+            <div
+              key={i}
+              className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm"
+            >
+              <p className="font-semibold text-md sm:text-lg text-gray-800 dark:text-white">
+                {i + 1}. [{q.type}]
+              </p>
+              <p className="text-sm sm:text-md text-gray-600 dark:text-gray-300">{q.question}</p>
+              {showAnswers && (
+                <p className="text-green-600 font-semibold mt-2">Answer: {q.answer}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+
 
                 {/* Download All Papers */}
                 <div className="flex justify-end space-x-2">
-            <button className="px-3 py-1.5 bg-green-500 text-white rounded-lg" onClick={() => downloadPaper("pdf")}>Download PDF</button>
-            
-            <button className="px-3 py-1.5 bg-yellow-500 text-white rounded-lg" onClick={() => downloadPaper("csv")}>Download CSV</button>
-          </div>
+                  <button className="px-3 py-1.5 bg-green-500 text-white rounded-lg" onClick={() => downloadPaper("pdf")}>Download PDF</button>
+
+                  <button className="px-3 py-1.5 bg-yellow-500 text-white rounded-lg" onClick={() => downloadPaper("csv")}>Download CSV</button>
+                </div>
               </div>
             )}
 
