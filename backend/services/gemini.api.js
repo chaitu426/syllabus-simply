@@ -29,14 +29,17 @@ export const generateQuestionPaper = async (syllabus, difficulty, questionType) 
  6. Ensure **options[] exists only for "mcq" and "matching" question types**.  
  7. Ensure **type values strictly match**: "mcq", "fillblanks", "truefalse", "matching", "longAnswer", "shortAnswer".  
  8. **For question types other than mcq and matching, DO NOT return the "options" field.**  
-
+ 9. dont give true false questions for short answer and long answer questions.
+10. give ans of longAnswer in detail 6-7 lines.
+11. give ans of shortAnswer in 2-3 lines.
 ### **Output Format (Strict JSON):**  
 [
   { "question": "What is recursion?", "type": "mcq", "options": ["Function calls itself", "Loop", "Variable", "None"], "answer": "Function calls itself" },
   { "question": "Explain polymorphism in OOP.", "type": "shortAnswer", "answer": "Polymorphism allows objects to be treated as instances of their parent class." },
-  { "question": "True or False: A linked list is a static data structure.", "type": "truefalse", "answer": "False" },
   { "question": "_____ is the process of finding the shortest path in a graph.", "type": "fillblanks", "answer": "Dijkstra's Algorithm" }
 ]
+
+
 
 
 
